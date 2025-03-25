@@ -1,23 +1,29 @@
-
+import os
 import json
 import time
 import asyncio
 import aiohttp
 from telegram import Bot
 
-# Telegram Bot Token & Channel ID
-TELEGRAM_BOT_TOKEN = "7724958845:AAGXeZwj4vHPkxBid7X0kd5pH1Ox6S2Zvqw"
-TELEGRAM_CHANNEL_ID = "-1002095159429"
+# ✅ Load Environment Variables Securely
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+TELEGRAM_CHANNEL_ID = os.getenv("TELEGRAM_CHANNEL_ID")
+
+# ✅ Validate Credentials Before Running
+if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHANNEL_ID:
+    raise ValueError("❌ Missing Telegram API credentials. Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHANNEL_ID as environment variables.")
+
+# ✅ Initialize Telegram Bot AFTER Validation
+bot = Bot(token=TELEGRAM_BOT_TOKEN)
 
 # API URLs
 PERIOD_API_URL = "https://draw.ar-lottery01.com/WinGo/WinGo_1M.json"
 RESULT_API_URL = "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json"
 
-# Initialize Telegram Bot
-bot = Bot(token=TELEGRAM_BOT_TOKEN)
 current_prediction = None
 consecutive_losses = 0
 
+# ✅ Helper Functions
 def get_big_small(number):
     return "SMALL" if number in [0, 1, 2, 3, 4] else "BIG"
 
@@ -31,7 +37,7 @@ async def fetch_data(url, params=None):
             try:
                 return json.loads(text)
             except json.JSONDecodeError:
-                print("JSON Decode Error")
+                print("[ERROR] JSON Decode Error")
                 return None
 
 async def fetch_latest_results():
@@ -54,7 +60,7 @@ async def send_prediction():
     if not results:
         return
     
-    # Use the latest issue number to determine the best prediction
+    # ✅ Predict Based on Latest Results
     latest_result = results[0]
     prediction_mode = "bs" if get_big_small(int(latest_result["number"])) == get_big_small(int(results[1]["number"])) else "color"
     prediction = get_big_small(int(latest_result["number"])) if prediction_mode == "bs" else get_red_green(int(latest_result["number"]))
@@ -101,22 +107,22 @@ async def main():
     while True:
         start_time = time.time()  # Mark the start of the cycle
 
-        # Step 1: Wait for the start of a new minute
+        # ✅ Step 1: Wait for the start of a new minute
         elapsed = start_time % 60
         if elapsed > 0:
             await asyncio.sleep(60 - elapsed)
 
-        # Step 2: Update the result at 2s
+        # ✅ Step 2: Update the result at 2s
         await asyncio.sleep(2)  
         print(f"[INFO] Updating result at {time.strftime('%H:%M:%S')}")
         await update_result()
 
-        # Step 3: Fetch current period & send prediction at 3s
+        # ✅ Step 3: Fetch current period & send prediction at 3s
         await asyncio.sleep(1)  
         print(f"[INFO] Fetching current period & sending prediction at {time.strftime('%H:%M:%S')}")
         await send_prediction()
 
-        # Ensure exactly 60s cycle
+        # ✅ Ensure exactly 60s cycle
         elapsed = time.time() - start_time
         await asyncio.sleep(max(60 - elapsed, 0))
 
@@ -124,4 +130,3 @@ if __name__ == "__main__":
     import nest_asyncio
     nest_asyncio.apply()
     asyncio.run(main())
-
