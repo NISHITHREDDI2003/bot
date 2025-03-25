@@ -6,8 +6,8 @@ import aiohttp
 from telegram import Bot
 
 # Telegram Bot Token & Channel ID
-TELEGRAM_BOT_TOKEN = "7724958845:AAGXeZwj4vHPkxBid7X0kd5pH1Ox6S2Zvqw"
-TELEGRAM_CHANNEL_ID = "-1002095159429"
+TELEGRAM_BOT_TOKEN = "your_bot_token"
+TELEGRAM_CHANNEL_ID = "your_channel_id"
 
 # API URLs
 PERIOD_API_URL = "https://draw.ar-lottery01.com/WinGo/WinGo_1M.json"
