@@ -2,3 +2,4 @@ python-telegram-bot
 aiohttp
 asyncio
 nest_asyncio
+os
